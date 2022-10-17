@@ -21,3 +21,30 @@ export function processHeaders(headers: any, data: any): any {
     }
   }
 }
+
+interface parsedType {
+  [propName: string]: string
+}
+
+export function parseHeaders(headers: string): any {
+  const parsed: parsedType = {}
+
+  if (!headers) return parsed
+
+  headers.split('\r\n').forEach(line => {
+    let [key, val] = line.split(':')
+
+    key = key.trim().toLowerCase()
+
+    if (!key) {
+      return
+    }
+    if (val) {
+      val = val.trim()
+    }
+
+    parsed[key] = val
+  })
+
+  return parsed
+}
