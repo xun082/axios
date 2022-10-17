@@ -18,9 +18,9 @@ export default function xhr(config: AxiosRequestConfig): AxiosPromise {
     request.open(method.toUpperCase(), url, true)
 
     request.onreadystatechange = function handleLoad() {
-      if (request.readyState !== 4) {
-        return
-      }
+      if (request.readyState !== 4) return
+
+      if (request.status === 0) return
 
       request.onerror = function handleError() {
         reject(new Error('NetWork Error'))
@@ -41,7 +41,7 @@ export default function xhr(config: AxiosRequestConfig): AxiosPromise {
         config,
         request
       }
-      resolve(response)
+      handleResponse(response)
     }
 
     Object.keys(headers).forEach(name => {
@@ -53,5 +53,13 @@ export default function xhr(config: AxiosRequestConfig): AxiosPromise {
     })
 
     request.send(data)
+
+    function handleResponse(response: AxiosResponse): void {
+      if (response.status >= 200 && response.status < 300) {
+        resolve(response)
+      } else {
+        reject(new Error(`Request failed with status code ${response.status}`))
+      }
+    }
   })
 }
