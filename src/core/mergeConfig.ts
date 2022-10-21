@@ -1,3 +1,4 @@
+import { isPlainObject } from '../helpers/util'
 import { AxiosRequestConfig } from '../types'
 
 const starts = Object.create(null)
@@ -12,10 +13,28 @@ function fromVal2Start(val1: any, val2: any): any {
   }
 }
 
+function deepMergeStart(val1: any, val2: any): any {
+  if (isPlainObject(val2)) {
+    return deepMerge(val1, val2)
+  } else if (typeof val2 !== 'undefined') {
+    return val2
+  } else if (isPlainObject(val1)) {
+    return deepMerge(val1)
+  } else if (typeof val1 !== 'undefined') {
+    return val1
+  }
+}
+
 const startKeysFromVal2 = ['url', 'params', 'data']
 
 startKeysFromVal2.forEach(key => {
   starts[key] = fromVal2Start
+})
+
+const startKeysDeepMerge = ['headers']
+
+startKeysDeepMerge.forEach(key => {
+  starts[key] = deepMergeStart
 })
 
 export default function mergeConfig(
@@ -44,4 +63,25 @@ export default function mergeConfig(
   }
 
   return config
+}
+
+// 深拷贝
+export function deepMerge(...objs: any[]): any {
+  const result = Object.create(null)
+  objs.forEach(obj => {
+    if (obj) {
+      Object.keys(obj).forEach(key => {
+        const val = obj[key]
+        if (isPlainObject(val)) {
+          if (isPlainObject(result[key])) {
+            result[key] = deepMerge(result[key], val)
+          } else {
+            result[key] = deepMerge(val)
+          }
+        } else {
+          result[key] = val
+        }
+      })
+    }
+  })
 }
